@@ -177,6 +177,7 @@ function saveCart() {
 
 // --- CART UI ---
 function updateCartUI() {
+    // Cart contract expected across pages: #cartItems, #cartFooter, #cartTotal, #cartCount, #cartBadge
     const cartContainer = document.getElementById('cartItems');
     const cartFooter = document.getElementById('cartFooter');
     const cartTotal = document.getElementById('cartTotal');
@@ -266,7 +267,6 @@ function closeCart() {
     document.getElementById('cartOverlay')?.classList.remove('open');
 }
 
-// --- CHECKOUT FLOW ---
 // --- CHECKOUT FLOW ---
 function injectCheckoutModal() {
     if (document.getElementById('checkoutOverlay')) return;
@@ -627,6 +627,12 @@ function filterProducts(category, btn) {
 // --- BIRTHDAY CAKE BUILDER ---
 let selectedFlavor = 'Red Velvet';
 let selectedWeight = '1.0';
+const BIRTHDAY_BASE_PRICES = {
+    '0.5': 450,
+    '1.0': 850,
+    '1.5': 1250,
+    '2.0': 1600
+};
 // bdayCakes object is now populated dynamically via loadProducts()
 
 function updateBirthdayCake(flavor) {
@@ -647,10 +653,10 @@ function updateBirthdayCake(flavor) {
 
     // Update active flavor button
     document.querySelectorAll('.filter-pill').forEach(btn => {
-        btn.classList.remove('active');
-
         if (btn.textContent.trim() === flavor) {
             btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
         }
     });
 
@@ -676,15 +682,7 @@ function setCakeWeight(weight) {
 }
 
 function calculateBdayPrice() {
-
-    const basePrices = {
-        "0.5": 450,
-        "1.0": 850,
-        "1.5": 1250,
-        "2.0": 1600
-    };
-
-    const finalPrice = basePrices[selectedWeight];
+    const finalPrice = BIRTHDAY_BASE_PRICES[selectedWeight];
 
     const priceEl = document.getElementById('cakePrice');
 
@@ -695,18 +693,12 @@ function calculateBdayPrice() {
 }
 
 function getBirthdayFavouriteItem() {
-    const basePrices = {
-        "0.5": 450,
-        "1.0": 850,
-        "1.5": 1250,
-        "2.0": 1600
-    };
     const cake = bdayCakes[selectedFlavor] || {};
 
     return {
         id: `bday-${selectedFlavor}-${selectedWeight}`,
         name: `${selectedFlavor} Cake (${selectedWeight}kg)`,
-        price: basePrices[selectedWeight],
+        price: BIRTHDAY_BASE_PRICES[selectedWeight],
         img: cake.img || document.getElementById('birthdayCakeImg')?.src || '',
         emoji: cake.emoji || '',
         category: 'cakes'
@@ -733,14 +725,8 @@ function toggleBirthdayFavourite() {
 
 function addBirthdayToCart() {
     if (!bdayCakes[selectedFlavor]) return; // Wait until loaded
-const basePrices = {
-    "0.5": 450,
-    "1.0": 850,
-    "1.5": 1250,
-    "2.0": 1600
-};
-
-const finalPrice = basePrices[selectedWeight];    const msgInput = document.getElementById('cakeMessage');
+    const finalPrice = BIRTHDAY_BASE_PRICES[selectedWeight];
+    const msgInput = document.getElementById('cakeMessage');
     const message = msgInput ? msgInput.value.trim() : '';
 
     const item = {
@@ -749,8 +735,8 @@ const finalPrice = basePrices[selectedWeight];    const msgInput = document.getE
         price: Math.round(finalPrice),
         img: bdayCakes[selectedFlavor].img,
         emoji: bdayCakes[selectedFlavor].emoji,
-        category: "cakes",
-        message: message,
+        category: 'cakes',
+        message,
         qty: 1
     };
     addToCart(item);
